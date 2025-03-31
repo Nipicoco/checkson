@@ -16,7 +16,8 @@ from ..utils.terminal import (
     print_result_table, 
     print_summary,
     create_progress_bar,
-    console
+    console,
+    clear_terminal
 )
 from ..checkers.github import (
     check_github_username,
@@ -25,19 +26,34 @@ from ..checkers.github import (
     check_github_repos_async
 )
 from ..checkers.domains import check_domain, check_domains_async
+from ..__init__ import __version__
 
+# Create Typer app with rich formatting
 app = typer.Typer(
-    help="Checkson - A fast and user-friendly availability checker",
-    add_completion=False
+    help="✨ Checkson - A fast and user-friendly availability checker ✨",
+    add_completion=False,
+    rich_markup_mode="rich"
 )
 
 
 @app.callback()
-def callback():
+def callback(
+    version: Optional[bool] = typer.Option(
+        None, "--version", "-v", help="Show version and exit", is_flag=True
+    )
+):
     """
-    Checkson - Check the availability of usernames, repositories, and domains.
+    🔍 [bold blue]Checkson[/bold blue] - Check the availability of usernames, repositories, and domains.
+    
+    A fast, modern CLI tool with beautiful terminal UI.
     """
-    print_header("Checkson - Availability Checker")
+    # Show the header
+    print_header(f"✨ Checkson v{__version__} ✨")
+    
+    # Show version and exit if requested
+    if version:
+        console.print(f"[bold]Checkson[/bold] version: [cyan]{__version__}[/cyan]")
+        raise typer.Exit()
 
 
 @app.command()
@@ -65,7 +81,9 @@ def github(
     )
 ):
     """
-    Check GitHub username availability.
+    🔍 Check GitHub username availability.
+    
+    Quickly find out if GitHub usernames are available for registration.
     """
     names_to_check = []
     
@@ -87,7 +105,7 @@ def github(
     if not names_to_check or interactive:
         print_subheader("Enter GitHub usernames to check (empty line to finish):")
         while True:
-            name = Prompt.ask("Username")
+            name = Prompt.ask("[bold cyan]Username[/bold cyan]")
             if not name:
                 break
             names_to_check.append(name)
@@ -166,7 +184,9 @@ def repo(
     )
 ):
     """
-    Check GitHub repository availability.
+    📁 Check GitHub repository availability.
+    
+    Check if repository names are available under a specific user or organization.
     """
     names_to_check = []
     
@@ -188,7 +208,7 @@ def repo(
     if not names_to_check or interactive:
         print_subheader("Enter repository names to check (empty line to finish):")
         while True:
-            name = Prompt.ask("Repository name")
+            name = Prompt.ask("[bold cyan]Repository name[/bold cyan]")
             if not name:
                 break
             names_to_check.append(name)
@@ -261,7 +281,9 @@ def domain(
     )
 ):
     """
-    Check domain name availability.
+    🌐 Check domain name availability.
+    
+    Find out if domain names are registered or available for purchase.
     """
     domains_to_check = []
     
@@ -283,7 +305,7 @@ def domain(
     if not domains_to_check or interactive:
         print_subheader("Enter domain names to check (empty line to finish):")
         while True:
-            domain = Prompt.ask("Domain name")
+            domain = Prompt.ask("[bold cyan]Domain name[/bold cyan]")
             if not domain:
                 break
             domains_to_check.append(domain)
