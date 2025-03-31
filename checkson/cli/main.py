@@ -3,12 +3,16 @@ Main CLI entry point for the Checkson application.
 """
 import asyncio
 import typer
+import sys
+import os
 from typing import List, Optional
 from pathlib import Path
-import sys
 import time
 
 from rich.prompt import Prompt, Confirm
+from rich.panel import Panel
+from rich.text import Text
+from rich import box
 
 from ..utils.terminal import (
     print_header, 
@@ -17,7 +21,8 @@ from ..utils.terminal import (
     print_summary,
     create_progress_bar,
     console,
-    clear_terminal
+    clear_terminal,
+    TerminalUI
 )
 from ..checkers.github import (
     check_github_username,
@@ -32,27 +37,112 @@ from ..__init__ import __version__
 app = typer.Typer(
     help="✨ Checkson - A fast and user-friendly availability checker ✨",
     add_completion=False,
-    rich_markup_mode="rich"
+    rich_markup_mode="rich",
+    no_args_is_help=False,  # Disable auto help page on no args
 )
 
 
-@app.callback()
+# Helper function to launch interactive menu when no command is provided
+def launch_interactive_mode():
+    """Launch the interactive menu mode."""
+    # We import locally to avoid circular imports
+    try:
+        # We create a minimal implementation that can launch the interactive menu
+        clear_terminal()
+        print_header(f"✨ Checkson v{__version__} ✨", clear=False)
+        
+        console.print(Panel(
+            Text("A fast, user-friendly availability checker for GitHub usernames,\nrepositories, and domain names.", 
+                 style="cyan", justify="center"),
+            border_style="blue",
+            box=box.ROUNDED
+        ))
+        
+        options = [
+            {
+                "name": "🔍 GitHub Usernames", 
+                "description": "Check availability of GitHub usernames",
+                "value": "github"
+            },
+            {
+                "name": "📁 GitHub Repositories", 
+                "description": "Check if repositories exist under an owner",
+                "value": "repo"
+            },
+            {
+                "name": "🌐 Domain Names", 
+                "description": "Check if domain names are available",
+                "value": "domain"
+            },
+            {
+                "name": "❓ Help", 
+                "description": "Show help information",
+                "value": "help"
+            },
+            {
+                "name": "❌ Exit", 
+                "description": "Exit the application",
+                "value": "exit"
+            }
+        ]
+        
+        # Show the menu and get choice
+        choice = TerminalUI.smart_menu("Please select an option:", options)
+        
+        # Handle the selected option
+        if choice == "exit":
+            console.print("[yellow]Goodbye! Thanks for using Checkson.[/yellow]")
+            return
+        elif choice == "help":
+            # Show help and return to menu
+            clear_terminal()
+            os.system(f"{sys.executable} -m checkson --help")
+            console.print("\n[bold cyan]Press Enter to return to the main menu...[/bold cyan]")
+            input()
+            return launch_interactive_mode()
+        else:
+            # Run the selected command
+            clear_terminal()
+            cmd = f"{sys.executable} -m checkson {choice} --interactive"
+            console.print(f"[dim]Running: {cmd}[/dim]\n")
+            
+            result = os.system(cmd)
+            
+            # Ask if user wants to return to main menu
+            console.print("\n[bold cyan]Return to main menu? (y/n)[/bold cyan] ", end="")
+            response = input().lower()
+            if response == "" or response.startswith("y"):
+                return launch_interactive_mode()
+    
+    except KeyboardInterrupt:
+        console.print("\n[yellow]Operation cancelled. Goodbye![/yellow]")
+    except Exception as e:
+        console.print(f"\n[bold red]An error occurred:[/bold red] {str(e)}")
+        console.print("\nIf this issue persists, please report it on GitHub.")
+        time.sleep(2)
+
+
+@app.callback(invoke_without_command=True)
 def callback(
     version: Optional[bool] = typer.Option(
         None, "--version", "-v", help="Show version and exit", is_flag=True
-    )
+    ),
+    ctx: typer.Context = typer.Context,
 ):
     """
     🔍 [bold blue]Checkson[/bold blue] - Check the availability of usernames, repositories, and domains.
     
     A fast, modern CLI tool with beautiful terminal UI.
     """
-    # Show the header
-    print_header(f"✨ Checkson v{__version__} ✨")
-    
     # Show version and exit if requested
     if version:
+        print_header(f"✨ Checkson v{__version__} ✨")
         console.print(f"[bold]Checkson[/bold] version: [cyan]{__version__}[/cyan]")
+        raise typer.Exit()
+    
+    # If no command was invoked and this is the main callback, launch interactive mode
+    if ctx.invoked_subcommand is None:
+        launch_interactive_mode()
         raise typer.Exit()
 
 
@@ -85,6 +175,9 @@ def github(
     
     Quickly find out if GitHub usernames are available for registration.
     """
+    # Show the header
+    print_header(f"✨ Checkson v{__version__} ✨")
+    
     names_to_check = []
     
     # Load from file if specified
@@ -188,6 +281,9 @@ def repo(
     
     Check if repository names are available under a specific user or organization.
     """
+    # Show the header
+    print_header(f"✨ Checkson v{__version__} ✨")
+    
     names_to_check = []
     
     # Load from file if specified
@@ -285,6 +381,9 @@ def domain(
     
     Find out if domain names are registered or available for purchase.
     """
+    # Show the header
+    print_header(f"✨ Checkson v{__version__} ✨")
+    
     domains_to_check = []
     
     # Load from file if specified

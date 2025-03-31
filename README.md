@@ -33,26 +33,42 @@ Checkson is a modern, interactive terminal application designed to help you quic
 git clone https://github.com/nipicoco/checkson.git
 cd checkson
 
-# Install the package
+# Install the package in development mode
 pip install -e .
 ```
+
+After installation, you can use the tool in several ways:
+
+1. **Interactive Menu** - Simply run without any arguments:
+   ```bash
+   checkson
+   ```
+
+2. **Direct Python Script** - Run the main script directly:
+   ```bash
+   python main.py
+   ```
+
+3. **As a Python Module** - Execute as a module:
+   ```bash
+   python -m checkson
+   ```
 
 ## 📖 Usage
 
 ### Interactive Mode
 
-Simply run the application without arguments for an interactive terminal UI:
+The simplest way to use Checkson is in interactive mode:
 
 ```bash
-# Launch interactive mode
+# Launch the interactive menu
 checkson
 ```
 
-Or run the Python script directly:
-
-```bash
-python main.py
-```
+This will display a menu where you can:
+- Navigate with arrow keys or number keys
+- Select options with Enter
+- Exit with Escape or 'q'
 
 ### Command Line Mode
 

@@ -10,6 +10,9 @@ import time
 from typing import List, Optional, Dict, Any
 import traceback
 from rich.traceback import install
+from rich.panel import Panel
+from rich.text import Text
+from rich import box
 
 from checkson.cli.main import app
 from checkson.utils.terminal import console, TerminalUI
@@ -56,6 +59,14 @@ class ChecksonApp:
         """Display the application header."""
         TerminalUI.clear_terminal()
         TerminalUI.print_header(f"✨ Checkson v{__version__} ✨", clear=False)
+        
+        # Add a description panel
+        console.print(Panel(
+            Text("A fast, user-friendly availability checker for GitHub usernames,\nrepositories, and domain names.", 
+                 style="cyan", justify="center"),
+            border_style="blue",
+            box=box.ROUNDED
+        ))
     
     def show_help(self):
         """Show help information and return to menu."""
@@ -135,13 +146,19 @@ class ChecksonApp:
             sys.exit(1)
 
 
+# Function to run the interactive mode (callable from other modules)
+def run_interactive_mode():
+    """Run the application in interactive mode with a menu-based UI."""
+    app_instance = ChecksonApp()
+    app_instance.run()
+
+
 def main():
     """Main entry point for the application."""
     try:
         # If no command line arguments are provided, run in interactive mode
         if len(sys.argv) == 1:
-            app_instance = ChecksonApp()
-            app_instance.run()
+            run_interactive_mode()
         else:
             # Otherwise, pass control to the Typer app
             app()
